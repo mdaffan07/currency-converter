@@ -191,30 +191,38 @@ async function convertMoney() {
 
     // Basic validation
     if (!amount || amount <= 0) {
+        resultBox.style.color = "red";
         resultBox.textContent = "Please enter a valid amount.";
         return;
     }
 
     // Same currency
     if (from === to) {
-        resultBox.textContent = `${amount} ${from} = ${amount} ${to}`;
-        return;
+        resultBox.style.color = "red";
+        resultBox.textContent = "Same currency can't be converted";
+
+    } else {
+        resultBox.style.color = "green";
+        resultBox.textContent = "Converting...";
+        try {
+            // Free API: Frankfurter
+            let url = `https://api.frankfurter.app/latest?amount=${amount}&from=${from}&to=${to}`;
+            let response = await fetch(url);
+            let data = await response.json();
+
+            let finalValue = data.rates[to];
+            resultBox.style.color = "green";
+            resultBox.textContent = `${amount} ${from} = ${finalValue.toFixed(2)} ${to}`;
+
+        } catch (error) {
+            resultBox.textContent = "Error in conversion. Try again.";
+        }
     }
 
-    resultBox.textContent = "Converting...";
-
-    try {
-        // Free API: Frankfurter
-        let url = `https://api.frankfurter.app/latest?amount=${amount}&from=${from}&to=${to}`;
-        let response = await fetch(url);
-        let data = await response.json();
-
-        let finalValue = data.rates[to];
-        resultBox.textContent = `${amount} ${from} = ${finalValue.toFixed(2)} ${to}`;
-
-    } catch (error) {
-        resultBox.textContent = "Error in conversion. Try again.";
-    }
 }
+
+
+
+
 
 convertBtn.addEventListener("click", convertMoney);
